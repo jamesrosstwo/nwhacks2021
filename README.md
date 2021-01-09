@@ -3,5 +3,6 @@ Repository containing source code for NWhacks 2021
 
 ## Installation
 
-1. Add conda environment `nwhacks`
-2. `conda env update --file `
+1. Install Anaconda
+2. `conda install python=3.7.9`
+3. `conda create --name nwhacks --file requirements.txt`
