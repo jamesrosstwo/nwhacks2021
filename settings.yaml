@@ -1,4 +1,4 @@
 map:
   save_path: "../out/map.html"
-  api_key: "AIzaSyAvaOMNqPz1mQMricvVT9dEEAj9xyWS2T0"
-  best_time_api_key: "pri_c701d18689744e3d9e380acdbe7c1b2e"
+  api_key: "<ENTER YOUR API KEY>"
+  best_time_api_key: "<ENTER YOUR API KEY>"
