@@ -1,4 +1,5 @@
-[{'address': '10609 King George Hwy', 'date': 'July 31, 2020 - August 1, 2020'}
+def get_events():
+ return [{'address': '10609 King George Hwy', 'date': 'July 31, 2020 - August 1, 2020'}
 {'address': 'Location: Royal Beauty Supply', 'date': '13553 105a Ave'}
 {'address': '405 North Road #2', 'date': 'August 1, 2020 - August 2, 2020'}
 {'address': '1031-1163 Pinetree Way (Facing, Lincoln Ave)', 'date': 'August 4, 2020'}
@@ -88,3 +89,4 @@
 {'address': '205 Main St., Vancouver, B.C.', 'date': 'July 1, 3, 4 and 7'}
 {'address': '654 Nelson St., Vancouver, B.C.', 'date': 'June 27, 29'}
 {'address': '5th Floor, 595 Hornby St., Vancouver, B.C.', 'date': 'June 21 to 24'}]
+ 
