@@ -81,7 +81,7 @@ class CovidMap:
             lat, long = geocoded_loc["lat"], geocoded_loc["lng"]
             self.exposures.append((lat, long))
             folium.Marker([lat, long],
-                          popup=self.make_popup("COVID Exposure: " + event["date"], width=150),
+                          popup=self.make_popup("<strong>COVID Exposure</strong><br> " + event["date"], width=150),
                           icon=folium.Icon(color="red", icon="exclamation-triangle", angle=0, prefix='fa')).add_to(
                 marker_cluster)
 
