@@ -8,6 +8,7 @@ from src.definitions import SETTINGS, ROOT_PATH
 from src.map.density.choropleth import generate_density_choropleth
 from src.map.events.exposure_events import get_events
 from src.map.risk.risk import calculate_risk_score
+from src.map.recommender.recommender import give_recommendation
 import googlemaps
 
 
@@ -47,14 +48,17 @@ class CovidMap:
         #                                      departure_time=now)
         # print(directions_result)
 
+        location = self.client.geocode(location)[0]["geometry"]["location"]
+        loc_lat, loc_long = location["lat"], location["lng"]
+
         if transport_mode is TransportMode.DRIVE:
-            self.graph = ox.graph_from_place(location, network_type='drive')
+            self.graph = ox.graph_from_point((loc_lat, loc_long), network_type='drive')
         elif transport_mode is TransportMode.TRANSIT:
             pass
         elif transport_mode is TransportMode.BIKE:
-            self.graph = ox.graph_from_place(location, network_type='bike')
+            self.graph = ox.graph_from_point((loc_lat, loc_long), network_type='bike')
         elif transport_mode is TransportMode.WALK:
-            self.graph = ox.graph_from_place(location, network_type='walk')
+            self.graph = ox.graph_from_point((loc_lat, loc_long), network_type='walk')
         else:
             raise Exception("Invalid transport mode passed to plot_route")
 
@@ -115,8 +119,8 @@ class CovidMap:
         dest_risk_score = calculate_risk_score(self, *dest_loc)
         destination_html = "<strong> Location: </strong><i>" + dest + \
                            "</i> <br> <strong> Risk Score: " + str(dest_risk_score * 100)[:4] + "%" \
-                                                                                                "</strong> <br> <strong> Recommendation: </strong>"
-
+                           "</strong> <br> <strong> Recommendation: </strong>" + \
+                           give_recommendation(destination, dest_risk_score)
         folium.Marker(
             list(dest_loc), popup=self.make_popup(destination_html), tooltip="Destination"
         ).add_to(route_map)
