@@ -6,7 +6,7 @@ def calculate_exposure_score(exposures, lat, long):
     score = 0
     for exposure in exposures:
         # Score += 1 / distance from exposure
-        score += 1 / (math.sqrt((lat - exposure[0]) ** 2 + (long - exposure[1]) ** 2))
+        score += 1 / (10000 * math.sqrt((lat - exposure[0]) ** 2 + (long - exposure[1]) ** 2))
     return np.tanh(score)  # Clamp between 0 and 1
 
 

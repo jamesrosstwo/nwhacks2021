@@ -7,6 +7,7 @@ from folium.plugins import MarkerCluster
 from src.definitions import SETTINGS, ROOT_PATH
 from src.map.density.choropleth import generate_density_choropleth
 from src.map.events.exposure_events import get_events
+from src.map.risk.risk import calculate_risk_score
 import googlemaps
 
 
@@ -62,6 +63,13 @@ class CovidMap:
         lat, long = geocoded_loc["lat"], geocoded_loc["lng"]
         return ox.get_nearest_node(self.graph, (lat, long))
 
+    def make_popup(self, inner_html, width=300):
+        iframe = folium.IFrame(inner_html)
+        popup = folium.Popup(iframe,
+                             min_width=width,
+                             max_width=width)
+        return popup
+
     def map_events(self, map_obj):
         events = get_events()
         marker_cluster = MarkerCluster().add_to(map_obj)
@@ -73,8 +81,9 @@ class CovidMap:
             lat, long = geocoded_loc["lat"], geocoded_loc["lng"]
             self.exposures.append((lat, long))
             folium.Marker([lat, long],
-                          popup="COVID Exposure: " + event["date"],
-                          icon=folium.Icon(color="red", icon="exclamation-triangle")).add_to(marker_cluster)
+                          popup=self.make_popup("COVID Exposure: " + event["date"], width=150),
+                          icon=folium.Icon(color="red", icon="exclamation-triangle", angle=0, prefix='fa')).add_to(
+                marker_cluster)
 
     def plot_route(self, dest, orig=None):
         if orig is None:
@@ -97,17 +106,23 @@ class CovidMap:
         route_map = ox.plot_route_folium(self.graph, route, route_color="#00cc33", route_width=8,
                                          tiles="Stamen Terrain")
 
+        self.map_events(route_map)
+
         folium.Marker(
-            list(orig_loc), popup="<i>" + orig + "</i>", tooltip="Origin"
+            list(orig_loc), popup=self.make_popup("<i>" + orig + "</i>"), tooltip="Origin"
         ).add_to(route_map)
+
+        dest_risk_score = calculate_risk_score(self, *dest_loc)
+        destination_html = "<strong> Location: </strong><i>" + dest + \
+                           "</i> <br> <strong> Risk Score: " + str(dest_risk_score * 100)[:4] + "%" \
+                                                                                                "</strong> <br> <strong> Recommendation: </strong>"
+
         folium.Marker(
-            list(dest_loc), popup="<i>" + dest + "</i>", tooltip="Destination"
+            list(dest_loc), popup=self.make_popup(destination_html), tooltip="Destination"
         ).add_to(route_map)
 
         density_choropleth = generate_density_choropleth()
         density_choropleth.add_to(route_map)
-
-        self.map_events(route_map)
 
         folium.LayerControl().add_to(route_map)
 
