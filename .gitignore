@@ -1,6 +1,8 @@
 ### CUSTOM ###
 
 *.html
+*.geojson
+
 
 ### DEFAULT ###
 # Byte-compiled / optimized / DLL files
