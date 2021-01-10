@@ -71,10 +71,10 @@ class CovidMap:
                 continue
             geocoded_loc = geocoded_loc[0]["geometry"]["location"]
             lat, long = geocoded_loc["lat"], geocoded_loc["lng"]
+            self.exposures.append((lat, long))
             folium.Marker([lat, long],
                           popup="COVID Exposure: " + event["date"],
                           icon=folium.Icon(color="red", icon="exclamation-triangle")).add_to(marker_cluster)
-
 
     def plot_route(self, dest, orig=None):
         if orig is None:
@@ -106,7 +106,7 @@ class CovidMap:
 
         density_choropleth = generate_density_choropleth()
         density_choropleth.add_to(route_map)
-        
+
         self.map_events(route_map)
 
         folium.LayerControl().add_to(route_map)
