@@ -1,0 +1,2 @@
+def regional_cases():
+  return {'Fraser': {'Total Cases': 35551, 'New Cases': 320, 'Active Cases': 3745}, 'Vancouver Coastal': {'Total Cases': 13025, 'New Cases': 139, 'Active Cases': 937}, 'Interior': {'Total Cases': 4487, 'New Cases': 81, 'Active Cases': 830}, 'Northern': {'Total Cases': 2387, 'New Cases': 49, 'Active Cases': 438}, 'Vancouver Island': {'Total Cases': 1079, 'New Cases': 27, 'Active Cases': 163}}
