@@ -1,7 +1,10 @@
 from enum import Enum, auto
+from typing import Tuple
+
 import osmnx as ox
 import networkx as nx
 import folium
+import polyline
 from folium.plugins import MarkerCluster
 
 from src.definitions import SETTINGS, ROOT_PATH
@@ -17,6 +20,14 @@ class TransportMode(Enum):
     TRANSIT = auto(),
     BIKE = auto(),
     WALK = auto()
+
+
+transport_mode_gmaps_map = {
+    TransportMode.DRIVE: "driving",
+    TransportMode.TRANSIT: "transit",
+    TransportMode.BIKE: "bicycling",
+    TransportMode.WALK: "walking"
+}
 
 
 class CovidMap:
@@ -52,7 +63,7 @@ class CovidMap:
         loc_lat, loc_long = location["lat"], location["lng"]
 
         if transport_mode is TransportMode.DRIVE:
-            self.graph = ox.graph_from_point((loc_lat, loc_long), network_type='drive')
+            self.graph = ox.graph_from_point((loc_lat, loc_long), network_type='drive', dist=5000)
         elif transport_mode is TransportMode.TRANSIT:
             pass
         elif transport_mode is TransportMode.BIKE:
@@ -89,6 +100,16 @@ class CovidMap:
                           icon=folium.Icon(color="red", icon="exclamation-triangle", angle=0, prefix='fa')).add_to(
                 marker_cluster)
 
+    def decode_path(self, gmaps_path):
+        return polyline.decode(gmaps_path[0]["overview_polyline"]["points"])
+
+    def get_gmaps_path(self, src_loc: Tuple, dest_loc: Tuple):
+        return self.client.directions(src_loc, dest_loc, mode=transport_mode_gmaps_map[self.transport_mode])
+
+    def make_polyline(self, route, color="#0033cc"):
+        polyline_path = self.decode_path(route)
+        return folium.PolyLine(polyline_path, color=color, width=8)
+
     def plot_route(self, dest, orig=None):
         if orig is None:
             orig = self.home_loc
@@ -102,13 +123,11 @@ class CovidMap:
         dest_loc = (destination["geometry"]["location"]["lat"], destination["geometry"]["location"]["lng"])
         dest_node = ox.get_nearest_node(self.graph, dest_loc)
 
-        route = nx.shortest_path(self.graph,
-                                 orig_node,
-                                 dest_node,
-                                 weight='length')
+        route = self.get_gmaps_path(orig_loc, dest_loc)
 
-        route_map = ox.plot_route_folium(self.graph, route, route_color="#00cc33", route_width=8,
-                                         tiles="Stamen Terrain")
+        route_map = folium.Map(location=orig_loc, tiles="Stamen Terrain")
+
+        self.make_polyline(route).add_to(route_map)
 
         self.map_events(route_map)
 
@@ -119,7 +138,7 @@ class CovidMap:
         dest_risk_score = calculate_risk_score(self, *dest_loc)
         destination_html = "<strong> Location: </strong><i>" + dest + \
                            "</i> <br> <strong> Risk Score: " + str(dest_risk_score * 100)[:4] + "%" \
-                           "</strong> <br> <strong> Recommendation: </strong>" + \
+                                                                                                "</strong> <br> <strong> Recommendation: </strong>" + \
                            give_recommendation(destination, dest_risk_score)
         folium.Marker(
             list(dest_loc), popup=self.make_popup(destination_html), tooltip="Destination"
